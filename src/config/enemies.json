@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Grunt",
+    "properties": {
+      "time": "number",
+      "health": "number"
+    }
+  },
+  {
+    "name": "Shooter",
+    "properties": {
+      "time": "number",
+      "fireRate": "number"
+    }
+  },
+  {
+    "name": "Bomber",
+    "properties": {
+      "time": "number",
+      "bombRadius": "number"
+    }
+  }
+]

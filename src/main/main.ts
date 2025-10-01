@@ -1,17 +1,15 @@
-/* eslint global-require: off, no-console: off, promise/always-return: off */
-
-/**
- * This module executes inside of electron's main process. You can start
- * electron renderer process from here and communicate with the other processes
- * through IPC.
- *
- * When running `npm run build` or `npm run build:main`, this file is compiled to
- * `./src/main.js` using webpack. This gives us some performance wins.
- */
 import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import fs from 'fs';
+import os from 'os';
+import { spawn } from 'child_process';
+import installExtension, {
+  REACT_DEVELOPER_TOOLS,
+} from 'electron-devtools-installer';
+import sourceMapSupport from 'source-map-support';
+import electronDebug from 'electron-debug';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -25,14 +23,30 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
+ipcMain.on('ipc-example', async (event) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
 });
 
+ipcMain.on('play-level', async (event, levelData) => {
+  const tempPath = path.join(os.tmpdir(), `level-${Date.now()}.json`);
+  fs.writeFileSync(tempPath, JSON.stringify(levelData, null, 2));
+
+  // Replace with the actual path to your game executable
+  const gamePath = '/Applications/Beat Blaster.app/Contents/MacOS/Beat Blaster';
+
+  try {
+    spawn(gamePath, [tempPath]);
+  } catch (error) {
+    // Optionally, send an error message back to the renderer process
+    event.reply(
+      'play-level-error',
+      'Failed to launch game. Please check the path.',
+    );
+  }
+});
+
 if (process.env.NODE_ENV === 'production') {
-  const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();
 }
 
@@ -40,20 +54,17 @@ const isDebug =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 if (isDebug) {
-  require('electron-debug').default();
+  electronDebug();
 }
 
 const installExtensions = async () => {
-  const installer = require('electron-devtools-installer');
   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-  const extensions = ['REACT_DEVELOPER_TOOLS'];
+  const extensions = [REACT_DEVELOPER_TOOLS];
 
-  return installer
-    .default(
-      extensions.map((name) => installer[name]),
-      forceDownload,
-    )
-    .catch(console.log);
+  return installExtension(extensions, {
+    forceDownload,
+    loadExtensionOptions: { allowFileAccess: true },
+  }).catch(() => {});
 };
 
 const createWindow = async () => {
@@ -133,5 +144,6 @@ app
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();
     });
+    return null;
   })
-  .catch(console.log);
+  .catch(() => {});

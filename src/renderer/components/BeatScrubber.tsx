@@ -1,13 +1,13 @@
-
 import React from 'react';
 
 interface BeatScrubberProps {
   position: number; // Position in pixels
 }
 
-const BeatScrubber: React.FC<BeatScrubberProps> = ({ position }) => {
+function BeatScrubber({ position }: BeatScrubberProps) {
   return (
     <div
+      className="beat-scrubber"
       style={{
         position: 'absolute',
         left: `${position}px`,
@@ -16,9 +16,10 @@ const BeatScrubber: React.FC<BeatScrubberProps> = ({ position }) => {
         height: '100%',
         backgroundColor: '#e74c3c',
         zIndex: 10,
+        cursor: 'pointer',
       }}
     />
   );
-};
+}
 
 export default BeatScrubber;
