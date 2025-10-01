@@ -11,10 +11,10 @@ class AudioEngine {
     return audioBuffer;
   }
 
-  static detectBeats(buffer: AudioBuffer): number[] {
+  static detectBeats(buffer: AudioBuffer): { id: string; time: number }[] {
     const data = buffer.getChannelData(0);
     const { sampleRate } = buffer;
-    const beats: number[] = [];
+    const beats: { id: string; time: number }[] = [];
     const chunkSize = 1024;
     const energyHistory: number[] = [];
     const historySize = 100; // Number of chunks to average over
@@ -38,8 +38,8 @@ class AudioEngine {
       if (energy > energyThreshold) {
         const time = i / sampleRate;
         // Avoid detecting multiple beats too close together
-        if (beats.length === 0 || time - beats[beats.length - 1] > 0.2) {
-          beats.push(time);
+        if (beats.length === 0 || time - beats[beats.length - 1].time > 0.2) {
+          beats.push({ id: `beat-${i}`, time });
         }
       }
     }

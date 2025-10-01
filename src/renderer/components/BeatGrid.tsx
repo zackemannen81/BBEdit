@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface BeatGridProps {
-  beats: number[];
+  beats: { id: string; time: number }[];
   duration: number;
 }
 
@@ -16,11 +16,10 @@ function BeatGrid({ beats, duration }: BeatGridProps) {
         height: '100%',
       }}
     >
-      {beats.map((beat, index) => {
-        const left = (beat / duration) * 100;
+      {beats.map((beat) => {
+        const left = (beat.time / duration) * 100;
         return (
-          <div
-            key={`beat-${beat}-${index}`}>
+          <div key={beat.id}>
             <div
               style={{
                 position: 'absolute',

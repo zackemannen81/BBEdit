@@ -1,10 +1,5 @@
 import React from 'react';
-import { EnemyData } from '../types';
-
-interface EnemyConfig {
-  name: string;
-  properties: Record<string, string>;
-}
+import { EnemyData, EnemyConfig } from '../types';
 
 interface PropertyEditorProps {
   selectedEnemy: EnemyData;
@@ -34,7 +29,7 @@ function PropertyEditor({
           <label htmlFor={prop}>{prop}:</label>
           <input
             id={prop}
-            type={type}
+            type={type || 'text'}
             value={(selectedEnemy as any)[prop] || ''}
             onChange={(e) =>
               handlePropertyChange(

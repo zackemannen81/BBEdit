@@ -4,16 +4,10 @@ import TimelineView from './components/TimelineView';
 import BeatScrubber from './components/BeatScrubber';
 import EnemyPalette from './components/EnemyPalette';
 import PropertyEditor from './components/PropertyEditor';
-import { EnemyData } from './types';
+import { EnemyData, EnemyConfig } from './types';
 import enemyConfigData from '../config/enemies.json';
-import './App.css';
 
 const audioEngine = new AudioEngine();
-
-interface EnemyConfig {
-  name: string;
-  properties: Record<string, string>;
-}
 
 export default function App() {
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
@@ -25,7 +19,7 @@ export default function App() {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState(0);
   const [selectedEnemyId, setSelectedEnemyId] = useState<string | null>(null);
-  const [beats, setBeats] = useState<number[]>([]);
+  const [beats, setBeats] = useState<{ id: string; time: number }[]>([]);
   const [enemyConfig] = useState<EnemyConfig[]>(enemyConfigData);
 
   useEffect(() => {
@@ -43,7 +37,7 @@ export default function App() {
     if (file) {
       const buffer = await audioEngine.loadAudioFile(file);
       setAudioBuffer(buffer);
-      const detectedBeats = audioEngine.detectBeats(buffer);
+      const detectedBeats = AudioEngine.detectBeats(buffer);
       setBeats(detectedBeats);
       setEnemies([]);
       setHistory([[]]);
@@ -70,7 +64,7 @@ export default function App() {
 
   const handleSave = () => {
     const levelData = { enemies, beats };
-    const json = JSON.stringify(levelData, null, 2);
+    JSON.stringify(levelData, null, 2);
     // In a real app, you would save this to a file
   };
 

@@ -26,7 +26,10 @@ if (!fs.existsSync(rendererPath)) {
 
 // JSDOM does not implement TextEncoder and TextDecoder
 if (!global.TextEncoder) {
-  global.TextEncoder = TextEncoder;
+  global.TextEncoder = TextEncoder as any;
+window.AudioContext = jest.fn().mockImplementation(() => ({
+  decodeAudioData: jest.fn(),
+}));
 }
 if (!global.TextDecoder) {
   // @ts-ignore

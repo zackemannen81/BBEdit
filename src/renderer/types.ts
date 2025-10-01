@@ -1,5 +1,11 @@
 export interface EnemyData {
   id: string;
   type: string;
-  time: number; // Represents the position in time (e.g., seconds)
+  time: number;
+  [key: string]: any;
+}
+
+export interface EnemyConfig {
+  name: string;
+  properties: Record<string, string | null>;
 }

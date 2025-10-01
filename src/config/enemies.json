@@ -3,20 +3,26 @@
     "name": "Grunt",
     "properties": {
       "time": "number",
-      "health": "number"
+      "health": "number",
+      "fireRate": null,
+      "bombRadius": null
     }
   },
   {
     "name": "Shooter",
     "properties": {
       "time": "number",
-      "fireRate": "number"
+      "health": null,
+      "fireRate": "number",
+      "bombRadius": null
     }
   },
   {
     "name": "Bomber",
     "properties": {
       "time": "number",
+      "health": null,
+      "fireRate": null,
       "bombRadius": "number"
     }
   }

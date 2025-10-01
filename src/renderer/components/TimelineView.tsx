@@ -15,7 +15,7 @@ interface TimelineViewProps {
   onPan: (pan: number) => void;
   selectedEnemyId: string | null;
   onSelectEnemy: (id: string) => void;
-  beats: number[];
+  beats: { id: string; time: number }[];
 }
 
 function TimelineView({
@@ -45,14 +45,14 @@ function TimelineView({
   };
 
   useEffect(() => {
-    if (timelineRef.current) {
+    if (timelineRef.current && timelineRef.current.parentElement) {
       timelineRef.current.parentElement.scrollLeft = pan;
     }
   }, [pan]);
 
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.button === 1) {
-      // Middle mouse button
+      // Middle mouse button = pan
       setIsPanning(true);
       lastPanX.current = event.clientX;
       event.preventDefault();
@@ -82,11 +82,11 @@ function TimelineView({
       let nearestBeat = -1;
       let smallestDistance = Infinity;
 
-      beats.forEach((beatTime) => {
-        const distance = Math.abs(beatTime - time);
+      beats.forEach((beat) => {
+        const distance = Math.abs(beat.time - time);
         if (distance < smallestDistance) {
           smallestDistance = distance;
-          nearestBeat = beatTime;
+          nearestBeat = beat.time;
         }
       });
 
@@ -122,6 +122,26 @@ function TimelineView({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // Ge tangentbordsstöd så rollen "button" verkligen är interaktiv
+    if (e.key === 'Escape') {
+      setIsDragging(false);
+      setIsPanning(false);
+    }
+    if (e.key === 'ArrowLeft') {
+      onPan(pan - 10);
+      e.preventDefault();
+    }
+    if (e.key === 'ArrowRight') {
+      onPan(pan + 10);
+      e.preventDefault();
+    }
+    // Space/Enter triggar "primär handling" – här: inget direkt men bevarad för a11y
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+    }
+  };
+
   const calculateLeftPosition = (time: number) => {
     if (!audioBuffer || !timelineRef.current) return '0px';
     const { duration } = audioBuffer;
@@ -130,22 +150,25 @@ function TimelineView({
   };
 
   return (
-    <div
-      style={{ overflowX: 'scroll' }}
-      onContextMenu={(e) => e.preventDefault()}
-      role="group"
-    >
+    <div style={{ overflowX: 'scroll' }}>
       <div
         ref={timelineRef}
+        // Gör ytan "interaktiv" för jsx-a11y:
+        role="button"
+        tabIndex={0}
+        aria-label="Timeline editor"
+        aria-roledescription="timeline editor"
         style={{
           position: 'relative',
           width: `${100 * zoom}%`,
           height: '150px',
         }}
+        onContextMenu={(e) => e.preventDefault()}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp} // Stop dragging if mouse leaves the container
+        onMouseLeave={handleMouseUp}
         onMouseMove={handleMouseMove}
+        onKeyDown={handleKeyDown}
       >
         <Waveform audioBuffer={audioBuffer} zoom={zoom} />
         {audioBuffer && (
